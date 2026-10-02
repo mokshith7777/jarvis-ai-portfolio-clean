@@ -24,3 +24,7 @@ jarvis = "jarvis.__main__:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+include = ["jarvis*"]
+exclude = ["tests*", "assets*"]
