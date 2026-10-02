@@ -1,0 +1,21 @@
+services:
+  jarvis:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - jarvis-data:/app/data
+      - jarvis-state:/app/.jarvis
+
+volumes:
+  jarvis-data:
+  jarvis-state:
