@@ -33,6 +33,7 @@ jobs:
           test -f tools/registry.py
           test -f JARVIS_BRANDING.md
           test -f UPSTREAM_NOTICE.md
+          test -f scripts/run_tests.sh
           grep -q 'name = "jarvis-agent"' pyproject.toml
           grep -q 'jarvis_cli.main:main' pyproject.toml
       - name: Install JARVIS development dependencies
@@ -44,7 +45,7 @@ jobs:
           uv venv .venv --python 3.14
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Install JARVIS
-        run: uv pip install -e ".[all]" pytest pytest-xdist pytest-asyncio
+        run: uv pip install -e ".[all,dev]" pytest pytest-xdist pytest-asyncio
       - name: Compile Python source
         run: python -m compileall -q .
       - name: Verify JARVIS commands
@@ -54,9 +55,13 @@ jobs:
           jarvis gateway --help
           jarvis skills --help
           jarvis tools --help
-      - name: Run upstream test suite
-        run: python -m pytest tests/ -q --ignore=tests/integration --ignore=tests/e2e --tb=short
-        env: {OPENROUTER_API_KEY: "", OPENAI_API_KEY: "", NOUS_API_KEY: ""}
+      - name: Run JARVIS parity test runner
+        run: bash scripts/run_tests.sh
+        env:
+          JARVIS_TEST_FILE_RETRIES: "0"
+          OPENROUTER_API_KEY: ""
+          OPENAI_API_KEY: ""
+          NOUS_API_KEY: ""
       - name: Commit materialized JARVIS source
         run: |
           git config user.name "JARVIS Bot"
