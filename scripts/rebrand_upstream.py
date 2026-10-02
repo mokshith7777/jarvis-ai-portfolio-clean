@@ -22,6 +22,12 @@ def clone_upstream():
     subprocess.run(["git","clone","--depth","1","--recurse-submodules",UPSTREAM,str(tmp)], check=True)
     return tmp
 def copy_upstream(src):
+    # Remove the pre-parity JARVIS scaffold first. Otherwise a renamed upstream
+    # directory such as hermes -> jarvis can collide with the old scaffold.
+    for legacy in ["jarvis", "jarvis_cli", "gateway", "tools", "tests", "skills", "plugins", "run_agent.py", "model_tools.py", "toolsets.py", "hermes_state.py", "pyproject.toml", "README.md"]:
+        target = ROOT / legacy
+        if target.is_dir(): shutil.rmtree(target)
+        elif target.exists(): target.unlink()
     for item in src.iterdir():
         if item.name in {".git",".github"}: continue
         dest = ROOT / item.name
