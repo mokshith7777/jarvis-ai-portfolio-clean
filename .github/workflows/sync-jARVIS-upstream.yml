@@ -1,37 +1,65 @@
-name: Sync JARVIS with upstream agent
-
+name: Materialize JARVIS from upstream
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "scripts/rebrand_upstream.py"
+      - ".github/workflows/sync-jARVIS-upstream.yml"
   schedule:
     - cron: "17 3 * * 1"
-
 permissions:
   contents: write
-
+concurrency:
+  group: jarvis-upstream-sync
+  cancel-in-progress: false
 jobs:
   sync:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Generate JARVIS parity tree
-        run: python scripts/rebrand_upstream.py
-      - name: Restore JARVIS-owned metadata
+      - name: Checkout JARVIS
+        uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Materialize upstream source
+        run: python3 scripts/rebrand_upstream.py
+      - name: Verify JARVIS source layout
         run: |
+          test -f pyproject.toml
+          test -d jarvis_cli
+          test -f run_agent.py
+          test -f jarvis_state.py
+          test -f gateway/run.py
+          test -f tools/registry.py
+          test -f JARVIS_BRANDING.md
           test -f UPSTREAM_NOTICE.md
-          test -f LICENSE
-      - name: Commit parity update
+          grep -q 'name = "jarvis-agent"' pyproject.toml
+          grep -q 'jarvis_cli.main:main' pyproject.toml
+      - name: Install JARVIS development dependencies
+        uses: astral-sh/setup-uv@v6
+        with: {enable-cache: true}
+      - name: Create Python environment
+        run: |
+          uv python install 3.11
+          uv venv .venv --python 3.11
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Install JARVIS
+        run: uv pip install -e ".[all,dev]"
+      - name: Compile Python source
+        run: python -m compileall -q .
+      - name: Verify JARVIS commands
+        run: |
+          jarvis --version
+          jarvis doctor --help
+          jarvis gateway --help
+          jarvis skills --help
+          jarvis tools --help
+      - name: Run upstream test suite
+        run: python -m pytest tests/ -q --ignore=tests/integration --ignore=tests/e2e --tb=short
+        env: {OPENROUTER_API_KEY: "", OPENAI_API_KEY: "", NOUS_API_KEY: ""}
+      - name: Commit materialized JARVIS source
         run: |
           git config user.name "JARVIS Bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          if git diff --cached --quiet; then
-            echo "No upstream changes."
-          else
-            git commit -m "sync: update JARVIS from upstream"
-            git push
-          fi
+          if git diff --cached --quiet; then echo "No upstream changes."; else git commit -m "sync: materialize JARVIS agent parity from upstream"; git push; fi
