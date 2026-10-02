@@ -44,7 +44,7 @@ jobs:
           uv venv .venv --python 3.14
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Install JARVIS
-        run: uv pip install -e ".[all,dev]"
+        run: uv pip install -e ".[all]" pytest pytest-xdist
       - name: Compile Python source
         run: python -m compileall -q .
       - name: Verify JARVIS commands
