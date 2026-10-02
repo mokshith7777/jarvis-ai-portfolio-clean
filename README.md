@@ -1,90 +1,52 @@
-# JARVIS Agent
+# JARVIS Agent Runtime
 
-A JARVIS-branded autonomous-agent runtime designed to reproduce the documented Hermes Agent capability surface while replacing the product identity, CLI, configuration namespace, commands, prompt branding, and visual identity with JARVIS.
+A modular, open-source agent runtime inspired by the architecture described in the attached Hermes-to-JARVIS blueprint.
 
-## Identity
+## Architecture implemented
 
-| Source surface | JARVIS surface |
-|---|---|
-| Hermes Agent | JARVIS Agent |
-| `hermes` executable | `jarvis` executable |
-| `hermes-agent` package identity | `jarvis-agent-runtime` |
-| `~/.hermes` namespace | `~/.jarvis` |
-| `HERMES_*` variables | `JARVIS_*` |
-| Hermes banner/prompt | JARVIS banner/prompt |
-| Hermes command registry | JARVIS command registry |
-| Hermes slash commands | JARVIS slash commands |
-
-The upstream project is MIT licensed. This derivative keeps the required attribution/licensing obligations while replacing the product identity with JARVIS.
-
-## CLI
-
-```bash
-jarvis
-jarvis --version
-jarvis chat -q "Hello"
-jarvis model
-jarvis setup
-jarvis gateway
-jarvis config
-jarvis profile
-jarvis tools
-jarvis skills
-jarvis doctor
-jarvis update
-jarvis --tui
-```
-
-Interactive commands:
-
-```text
-/help
-/new
-/reset
-/model
-/personality
-/retry
-/undo
-/compress
-/usage
-/insights
-/skills
-/stop
-/platforms
-/status
-/save
-/profile
-/tools
-/gateway
-/update
-/quit
-```
-
-## Runtime
-
-- Persistent SQLite WAL + FTS5 memory
-- Stable hot-memory prompt prefix
-- Dual-layer context-compression configuration
-- Provider abstraction and auxiliary routing
+- Stable system prompt and profile snapshots
+- Dual-layer context compression with persistent usage anchors
+- SQLite WAL + FTS5 episodic memory
+- Hot memory files: `SOUL.md`, `AGENTS.md`, `MEMORY.md`, `USER.md`
+- Programmatic tool execution through an RPC-style dispatcher
+- Configurable execution timeout and RPC-call limits
+- Provider abstraction with role-based auxiliary-model routing
+- Skill storage, validation, and usage telemetry
 - Parallel subagent orchestration with checkpoints
-- Skill storage and validation
-- OpenAI-compatible API
-- Programmatic execution guardrails
-- Hardened Docker defaults
-- CI tests
+- OpenAI-compatible FastAPI gateway
+- Approval gates and catastrophic-operation blocking
+- Docker hardening defaults and CI tests
 
-## Scope
+## Status
 
-The current repository contains the JARVIS runtime foundation and the compatibility surface. Full feature parity requires porting the remaining upstream modules, including the complete TUI, provider catalog, messaging adapters, browser/CDP stack, MCP integration, cron, ACP, richer skills lifecycle, and production sandbox/RPC implementation.
+This is the first runnable foundation. Provider adapters, browser/MCP integrations, and model-specific connectors are intentionally isolated behind interfaces so they can be added without changing the core agent loop.
 
-## Development
+## Quick start
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
-jarvis
-pytest -q
+cp .env.example .env
+python -m jarvis
 ```
 
 API: `http://127.0.0.1:8080`
+
+Run tests:
+
+```bash
+pytest
+```
+
+Run with Docker:
+
+```bash
+docker compose up --build
+```
+
+## Security
+
+The default approval mode is `smart`. Secrets are never loaded into prompts by the runtime. Code execution is isolated as a child process and is deliberately conservative; production deployments should place the worker inside a hardened container or stronger OS sandbox.
+
+This repository is a clean reimplementation of architectural ideas. It does not copy proprietary source code or branding from another project.

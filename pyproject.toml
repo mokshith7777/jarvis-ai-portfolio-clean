@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "jarvis-agent-runtime"
-version = "0.2.0"
-description = "JARVIS Agent — a Hermes-compatible, fully rebranded autonomous agent runtime."
+version = "0.1.0"
+description = "Modular JARVIS agent runtime with memory, compression, routing, skills and orchestration."
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115",
@@ -14,10 +14,13 @@ dependencies = [
   "pydantic-settings>=2.4",
   "httpx>=0.27",
 ]
+
 [project.optional-dependencies]
 dev = ["pytest>=8.3", "pytest-asyncio>=0.24"]
+
 [project.scripts]
-jarvis = "jarvis_cli.commands:main"
+jarvis = "jarvis.__main__:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
