@@ -16,8 +16,5 @@ class Settings(BaseSettings):
     aux_provider: str = "mock"
     api_key: str = ""
     model_config = SettingsConfigDict(env_prefix="JARVIS_", env_file=".env", extra="ignore")
-
-    def ensure_dirs(self) -> None:
-        Path(self.db).parent.mkdir(parents=True, exist_ok=True)
-
+    def ensure_dirs(self): Path(self.db).parent.mkdir(parents=True, exist_ok=True)
 settings = Settings()
