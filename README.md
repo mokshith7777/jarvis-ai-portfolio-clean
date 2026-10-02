@@ -50,3 +50,8 @@ docker compose up --build
 The default approval mode is `smart`. Secrets are never loaded into prompts by the runtime. Code execution is isolated as a child process and is deliberately conservative; production deployments should place the worker inside a hardened container or stronger OS sandbox.
 
 This repository is a clean reimplementation of architectural ideas. It does not copy proprietary source code or branding from another project.
+
+
+## Installation across platforms
+
+See [INSTALL.md](INSTALL.md) for Linux, macOS, Windows, Android/Termux, and Docker installation. Cross-platform CI runs on every push and pull request.
